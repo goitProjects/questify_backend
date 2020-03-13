@@ -11,11 +11,15 @@ const options = {
     },
     basePath: "/api"
   },
-  apis: ["src/routes/routes.js"]
+  apis: ["routes/routes.js"]
 };
 
 const specs = swaggerJsDoc(options);
+const swaggerBaseOptions = {
+  customSiteTitle: "Questify API Documentation",
+  customfavIcon: 'https://questify.goit.co.ua/fav.png'
+};
 
 module.exports = app => {
-  app.use("/doc", swaggerUI.serve, swaggerUI.setup(specs));
+  app.use("/doc", swaggerUI.serve, swaggerUI.setup(specs, swaggerBaseOptions));
 };

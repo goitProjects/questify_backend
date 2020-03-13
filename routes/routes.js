@@ -3,7 +3,7 @@ const router = express.Router();
 const cors = require("cors");
 const notFoundHandler = require("../middleware/not-found");
 const serverErrorHandler = require("../middleware/server-error");
-const config = require("../../config/config");
+const config = require("../config/config");
 
 // const UserController = require("../controllers/user");
 const UserController = require("../controllers/user.controller");
