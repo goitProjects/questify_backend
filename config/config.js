@@ -1,7 +1,9 @@
+require("dotenv").config();
+
 module.exports = {
   MondoDB: {
     // url: "mongodb://questify:goit34GH@127.0.0.1:27017/questify"
-    url: "mongodb://questify:goit34GH@goit.co.ua:27017/questify"
+    url: process.env.MONGO_DB_URI || "mongodb://localhost:27017/dev-questify"
   },
   client: {
     development: {
@@ -9,6 +11,6 @@ module.exports = {
       port: "3000"
     }
   },
-  jwt_encryption: process.env.JWT_ENCRYPTION || "jwt_please_change",
-  jwt_expiration: process.env.JWT_EXPIRATION || 10000
+  jwtSecretKey: process.env.JWT_SECRET_KEY || "jwt_please_change",
+  jwtExpiration: process.env.JWT_EXPIRATION || 10000
 };

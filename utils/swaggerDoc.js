@@ -11,13 +11,18 @@ const options = {
     },
     basePath: "/api"
   },
+  components: {
+    securitySchemes: {
+      bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" }
+    }
+  },
   apis: ["routes/routes.js"]
 };
 
 const specs = swaggerJsDoc(options);
 const swaggerBaseOptions = {
   customSiteTitle: "Questify API Documentation",
-  customfavIcon: 'https://questify.goit.co.ua/fav.png'
+  customfavIcon: "https://questify.goit.co.ua/fav.png"
 };
 
 module.exports = app => {

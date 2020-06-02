@@ -8,6 +8,7 @@ const cors = require("cors");
 const connectDB = require("./db/mongodb");
 const swaggerDoc = require("./utils/swaggerDoc");
 const routes = require("./routes/routes");
+const rateLimit = require("express-rate-limit");
 const app = express();
 
 // Passport Config
@@ -16,10 +17,23 @@ require("./utils/passport")(passport);
 // Get url to server MongoDB
 const dbUrl = require("./config/config").MondoDB.url;
 
+// Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
+// see https://expressjs.com/en/guide/behind-proxies.html
+// app.set('trust proxy', 1);
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message:
+    "Too many accounts created from this IP, please try again after an hour" // limit each IP to 100 requests per windowMs
+});
+
+//  apply to all requests
 // Connect to MongoDB
 connectDB(mongoose, { dbUrl });
 // Logger - see connection in/out
 app.use(morgan("dev"));
+app.use(limiter);
 // Express json parse
 app.use(express.json());
 // Express body parser

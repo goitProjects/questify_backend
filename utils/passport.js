@@ -8,7 +8,7 @@ const config = require("../config/config");
 module.exports = function(passport) {
   const opts = {};
   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-  opts.secretOrKey = config.jwt_encryption;
+  opts.secretOrKey = config.jwtSecretKey;
 
   passport.use(
     new JwtStrategy(opts, function(jwt_payload, done) {
