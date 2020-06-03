@@ -48,7 +48,7 @@ if (process.env.NODE_ENV === "production") {
  * /api/auth:
  *   post:
  *     tags:
- *       - Login
+ *       - Auth
  *     requestBody:
  *       content:
  *         application/json:
@@ -107,9 +107,17 @@ router.post("/auth", UserController.userLogin);
  * /api/user/me:
  *   post:
  *     tags:
- *       - Login
+ *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         description: token to be passed as a header
+ *         required: true
+ *         schema:
+ *            type: string
+ *            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZDY2NjUzMzc4MWMxZDIzNDhkOWMxNiIsImlhdCI6MTU5MTEwOTU5MywiZXhwIjoxNTkxMTE5NTkzfQ.uOJPW-Fft4QriDw6fgUxc26pYAmUWAFI6G9Kqwm1Gwk
  *     requestBody:
  *       content:
  *         application/json:
@@ -210,6 +218,42 @@ router.get(
  *   post:
  *     tags:
  *       - Quests CRUD
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         description: token to be passed as a header
+ *         required: true
+ *         schema:
+ *            type: string
+ *            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZDY2NjUzMzc4MWMxZDIzNDhkOWMxNiIsImlhdCI6MTU5MTEwOTU5MywiZXhwIjoxNTkxMTE5NTkzfQ.uOJPW-Fft4QriDw6fgUxc26pYAmUWAFI6G9Kqwm1Gwk
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *              - name
+ *                group
+ *                difficulty
+ *                dueDate
+ *             properties:
+ *                name:
+ *                  type: string
+ *                  example: Title Quest 1
+ *                group:
+ *                  type: string
+ *                  enum: ['STUFF', 'LEARNING', 'HEALTH', 'WORK', 'LEISURE', 'PRODUCTIVITY', 'SOCIAL', 'SPORT']
+ *                difficulty:
+ *                  type: string
+ *                  enum: ['Easy', 'Normal', 'Hard']
+ *                dueDate:
+ *                  type: string
+ *                  format: date-time
+ *                isPriority:
+ *                  type: boolean
+ *                  default: false
  *     responses:
  *       200:
  *         description: Return json with User data create
@@ -240,10 +284,28 @@ router.post("/quests", passport.authenticate("jwt"), UserQuestsController.new);
 /**
  * @swagger
  *
- * /api/quests:
+ * /api/quests/:questId:
  *   patch:
  *     tags:
  *       - Quests CRUD
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: questId
+ *         in: path
+ *         description: Pass in path questId
+ *         required: true
+ *         schema:
+ *            type: string
+ *            format: uuid
+ *            example: 5ed689d8ad016e425f79faaa
+ *       - name: Authorization
+ *         in: header
+ *         description: token to be passed as a header
+ *         required: true
+ *         schema:
+ *            type: string
+ *            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZDY2NjUzMzc4MWMxZDIzNDhkOWMxNiIsImlhdCI6MTU5MTEwOTU5MywiZXhwIjoxNTkxMTE5NTkzfQ.uOJPW-Fft4QriDw6fgUxc26pYAmUWAFI6G9Kqwm1Gwk
  *     responses:
  *       200:
  *         description: Return json with User data create
@@ -278,10 +340,28 @@ router.patch(
 /**
  * @swagger
  *
- * /api/quests/{questId}:
+ * /api/quests/:questId:
  *   delete:
  *     tags:
  *       - Quests CRUD
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: questId
+ *         in: path
+ *         description: Pass in path questId
+ *         required: true
+ *         schema:
+ *            type: string
+ *            format: uuid
+ *            example: 5ed689d8ad016e425f79faaa
+ *       - name: Authorization
+ *         in: header
+ *         description: token to be passed as a header
+ *         required: true
+ *         schema:
+ *            type: string
+ *            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZDY2NjUzMzc4MWMxZDIzNDhkOWMxNiIsImlhdCI6MTU5MTEwOTU5MywiZXhwIjoxNTkxMTE5NTkzfQ.uOJPW-Fft4QriDw6fgUxc26pYAmUWAFI6G9Kqwm1Gwk
  *     responses:
  *       200:
  *         description: Return json with User data create
@@ -320,7 +400,17 @@ router.delete(
  * /api/challenges/{challengeId}:
  *   patch:
  *     tags:
- *       - Challenges
+ *       - Challenges CRUD
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         description: token to be passed as a header
+ *         required: true
+ *         schema:
+ *            type: string
+ *            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZDY2NjUzMzc4MWMxZDIzNDhkOWMxNiIsImlhdCI6MTU5MTEwOTU5MywiZXhwIjoxNTkxMTE5NTkzfQ.uOJPW-Fft4QriDw6fgUxc26pYAmUWAFI6G9Kqwm1Gwk
  *     requestBody:
  *       content:
  *         application/json:

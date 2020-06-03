@@ -19,8 +19,10 @@ module.exports.getAll = (req, res) => {
 };
 
 module.exports.new = (req, res) => {
+  const userId = req.user._id;
   const newData = req.body;
-  const newQuests = new Quests(newData);
+
+  const newQuests = new Quests({ userId, ...newData });
 
   Dashboard.findOneAndUpdate(
     { userId: newData.userId },
@@ -40,8 +42,6 @@ module.exports.new = (req, res) => {
 module.exports.update = (req, res) => {
   const fieldUpdate = req.body;
   const questId = req.params.questId;
-  console.log(questId);
-  console.log(fieldUpdate);
 
   Quests.findByIdAndUpdate(
     questId,
@@ -54,7 +54,7 @@ module.exports.update = (req, res) => {
           message: err.message
         });
       }
-      console.log(quest);
+
       res.status(201).json({
         success: true,
         message: "New Quest successfully saved and returned this...",
