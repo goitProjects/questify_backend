@@ -19,7 +19,7 @@ module.exports.getAll = (req, res) => {
 };
 
 module.exports.new = (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user._id || req.body.userId;
   const newData = req.body;
 
   const newQuests = new Quests({ userId, ...newData });
