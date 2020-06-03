@@ -17,27 +17,29 @@ const UserSchema = new Schema(
     dashboard: {
       type: Schema.Types.ObjectId,
       ref: "Dashboard"
-    }
+    },
+    token: String
   },
   {
     timestamps: true
   }
 );
 
-UserSchema.methods.getJWT = function() {
-  let expiration_time = parseInt(CONFIG.jwt_expiration);
-  return (
-    "JWT " +
-    jwt.sign(
-      {
-        user_id: this._id
-      },
-      CONFIG.jwt_encryption,
-      {
-        expiresIn: expiration_time
-      }
-    )
+UserSchema.methods.getJWT = async function() {
+  const token = jwt.sign(
+    {
+      id: this._id
+    },
+    CONFIG.jwtSecretKey,
+    {
+      expiresIn: parseInt(CONFIG.jwtExpiration)
+    }
   );
+  const self = this;
+
+  self.token = token;
+  await self.save();
+  return token;
 };
 
 UserSchema.methods.toWeb = function() {

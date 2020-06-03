@@ -5,12 +5,235 @@ const Challenges = require("../models/Challenges.model");
 const QuestsDefault = require("../models/QuestsDefault.model.js");
 const ChallengesDefault = require("../models/ChallengesDefault.model.js");
 
+module.exports.me = (req, res) => {
+  const getUser = req.user;
+
+  Dashboard.findOne({ userId: getUser._id }, (err, getDashboard) => {
+    if (!getDashboard.challengeSend) {
+      Challenges.find({ userId: getUser._id }, (err, getUserChallenges) => {
+        const getChallengesNotSendUser = getUserChallenges.filter(
+          challenge => !challenge.challengeSendToUser
+        );
+
+        if (getChallengesNotSendUser.length === 0) {
+          Quests.populate(
+            getDashboard,
+            { path: "quests", model: "Quests" },
+            (err, getQuests) => {
+              Challenges.populate(
+                getQuests,
+                { path: "allChallenges", model: "Challenges" },
+                async (err, allQuestsWithChallenge) => {
+                  const getAllDoneChallenges = allQuestsWithChallenge.allChallenges.filter(
+                    challenge => challenge.done
+                  );
+
+                  //! IF CHALLENGE ALL USED GET NEW CHALLENGE FROM DEFAULT COLLECTION
+                  if (
+                    getAllDoneChallenges.filter(
+                      challengeDone => !challengeDone.done
+                    ).length === 0
+                  ) {
+                    (async () => {
+                      //! Get today Date for update documents
+                      const today = new Date();
+
+                      const defaultChallenges = await ChallengesDefault.find().lean();
+
+                      const defaultChallengesWithUserId = defaultChallenges.map(
+                        challenge => {
+                          challenge.dueDate = new Date(
+                            today.setDate(today.getDate() + 7)
+                          );
+
+                          return {
+                            dueDate: challenge.dueDate,
+                            name: challenge.name,
+                            group: challenge.group,
+                            difficulty: challenge.difficulty,
+                            userId: getUser._id
+                          };
+                        }
+                      );
+
+                      //* insert this document to quests collections
+                      const addedChallenges = await Challenges.insertMany(
+                        defaultChallengesWithUserId
+                      );
+
+                      // //* get id from new challenges created and updated. After Save this id in Dashboard this new User
+                      await Dashboard.updateOne(
+                        { userId: getUser._id },
+                        {
+                          $push: {
+                            allChallenges: [
+                              ...addedChallenges.map(challenge => challenge._id)
+                            ]
+                          }
+                        }
+                      );
+
+                      const getToken = await getUser.getJWT();
+
+                      delete getUser.token;
+
+                      return res.status(200).json({
+                        success: true,
+                        message:
+                          "User successfully created new challenges. Secondary login user get him.",
+                        token: getToken,
+                        data: {
+                          tasks: [
+                            ...allQuestsWithChallenge.quests,
+                            ...getAllDoneChallenges
+                          ],
+                          user: getUser
+                        }
+                      });
+                    })();
+                  }
+
+                  const getToken = await getUser.getJWT();
+                  delete getUser.token;
+                  return res.status(200).json({
+                    success: true,
+                    message:
+                      "User successfully created and his quests and challenges. One challenges send by get randomly",
+                    token: getToken,
+                    data: {
+                      tasks: [
+                        ...allQuestsWithChallenge.quests,
+                        ...getAllDoneChallenges
+                      ],
+                      user: getUser
+                    }
+                  });
+                }
+              );
+            }
+          );
+        }
+
+        if (getChallengesNotSendUser.length > 0) {
+          getDashboard.challengeSend =
+            getChallengesNotSendUser[
+              Math.floor(Math.random() * getChallengesNotSendUser.length)
+            ];
+
+          const getToday = new Date();
+
+          Challenges.findByIdAndUpdate(
+            getDashboard.challengeSend,
+            {
+              $set: {
+                dueDate: getToday.setDate(getToday.getDate() + 7)
+              }
+            },
+            { new: true },
+            // eslint-disable-next-line no-unused-vars
+            error => {
+              getDashboard.save((err, updatedDashboard) => {
+                if (updatedDashboard) {
+                  Quests.populate(
+                    updatedDashboard,
+                    { path: "quests", model: "Quests" },
+                    (err, getQuests) => {
+                      Challenges.populate(
+                        getQuests,
+                        [
+                          {
+                            path: "challengeSend",
+                            model: "Challenges"
+                          },
+                          {
+                            path: "allChallenges",
+                            model: "Challenges"
+                          }
+                        ],
+                        async (err, allQuestsWithChallenge) => {
+                          const getAllDoneChallenges = allQuestsWithChallenge.allChallenges.filter(
+                            challenge => challenge.done
+                          );
+
+                          delete getUser.token;
+
+                          const getToken = await getUser.getJWT();
+
+                          return res.status(200).json({
+                            success: true,
+                            message:
+                              "User successfully created and his quests and challenges. One challenges send by get randomly",
+                            token: getToken,
+                            data: {
+                              tasks: [
+                                ...allQuestsWithChallenge.quests,
+                                ...getAllDoneChallenges,
+                                allQuestsWithChallenge.challengeSend
+                              ],
+                              user: getUser
+                            }
+                          });
+                        }
+                      );
+                    }
+                  );
+                }
+              });
+            }
+          );
+        }
+      });
+    }
+
+    if (getDashboard.challengeSend) {
+      Quests.populate(
+        getDashboard,
+        { path: "quests", model: "Quests" },
+        (err, getQuests) => {
+          Challenges.populate(
+            getQuests,
+            [
+              { path: "challengeSend", model: "Challenges" },
+              { path: "allChallenges", model: "Challenges" }
+            ],
+            async (err, allQuestsWithChallenge) => {
+              const getAllChallenges = allQuestsWithChallenge.allChallenges.filter(
+                challenge => challenge.done
+              );
+
+              delete getUser.token;
+
+              const getToken = await getUser.getJWT();
+
+              return res.status(200).json({
+                success: true,
+                message:
+                  "User successfully created and his quests and challenges. One challenges send by get randomly",
+                token: getToken,
+                data: {
+                  tasks: allQuestsWithChallenge.challengeSend
+                    ? [
+                        ...allQuestsWithChallenge.quests,
+                        allQuestsWithChallenge.challengeSend,
+                        ...getAllChallenges
+                      ]
+                    : [...allQuestsWithChallenge.quests, ...getAllChallenges],
+                  user: getUser
+                }
+              });
+            }
+          );
+        }
+      );
+    }
+  });
+};
+
 module.exports.userLogin = (req, res) => {
+  const { nickname } = req.body;
+
+  // ? Check have USER in DB => query search by field 'nickname'
   try {
-    const { nickname } = req.body;
-
-    // ? Check have USER in DB => query search by field 'nickname'
-
     User.findOne({ nickname: nickname }, async (err, user) => {
       //! if have USER in DB. Return in response his Quests and One Challenge this USER
       if (user) {
@@ -32,7 +255,7 @@ module.exports.userLogin = (req, res) => {
                         Challenges.populate(
                           getQuests,
                           { path: "allChallenges", model: "Challenges" },
-                          (err, allQuestsWithChallenge) => {
+                          async (err, allQuestsWithChallenge) => {
                             const getAllDoneChallenges = allQuestsWithChallenge.allChallenges.filter(
                               challenge => challenge.done
                             );
@@ -71,7 +294,7 @@ module.exports.userLogin = (req, res) => {
                                 );
 
                                 // //* get id from new challenges created and updated. After Save this id in Dashboard this new User
-                                await Dashboard.update(
+                                await Dashboard.updateOne(
                                   { userId: getUser._id },
                                   {
                                     $push: {
@@ -84,10 +307,13 @@ module.exports.userLogin = (req, res) => {
                                   }
                                 );
 
-                                res.status(200).json({
+                                const getToken = await getUser.getJWT();
+                                delete getUser.token;
+                                return res.status(200).json({
                                   success: true,
                                   message:
                                     "User successfully created new challenges. Secondary login user get him.",
+                                  token: getToken,
                                   data: {
                                     tasks: [
                                       ...allQuestsWithChallenge.quests,
@@ -99,10 +325,13 @@ module.exports.userLogin = (req, res) => {
                               })();
                             }
 
-                            res.status(200).json({
+                            const getToken = await getUser.getJWT();
+                            delete getUser.token;
+                            return res.status(200).json({
                               success: true,
                               message:
                                 "User successfully created and his quests and challenges. One challenges send by get randomly",
+                              token: getToken,
                               data: {
                                 tasks: [
                                   ...allQuestsWithChallenge.quests,
@@ -155,13 +384,16 @@ module.exports.userLogin = (req, res) => {
                                       model: "Challenges"
                                     }
                                   ],
-                                  (err, allQuestsWithChallenge) => {
+                                  async (err, allQuestsWithChallenge) => {
                                     const getAllDoneChallenges = allQuestsWithChallenge.allChallenges.filter(
                                       challenge => challenge.done
                                     );
 
-                                    res.status(200).json({
+                                    const getToken = await getUser.getJWT();
+                                    delete getUser.token;
+                                    return res.status(200).json({
                                       success: true,
+                                      token: getToken,
                                       message:
                                         "User successfully created and his quests and challenges. One challenges send by get randomly",
                                       data: {
@@ -197,13 +429,16 @@ module.exports.userLogin = (req, res) => {
                       { path: "challengeSend", model: "Challenges" },
                       { path: "allChallenges", model: "Challenges" }
                     ],
-                    (err, allQuestsWithChallenge) => {
+                    async (err, allQuestsWithChallenge) => {
                       const getAllChallenges = allQuestsWithChallenge.allChallenges.filter(
                         challenge => challenge.done
                       );
 
-                      res.status(200).json({
+                      const getToken = await getUser.getJWT();
+                      delete getUser.token;
+                      return res.status(200).json({
                         success: true,
+                        token: getToken,
                         message:
                           "User successfully created and his quests and challenges. One challenges send by get randomly",
                         data: {
@@ -345,9 +580,12 @@ module.exports.userLogin = (req, res) => {
             Challenges.populate(
               getQuests,
               { path: "challengeSend", model: "Challenges" },
-              (err, allQuestsWithChallenge) => {
-                res.status(200).json({
+              async (err, allQuestsWithChallenge) => {
+                const getToken = await getUser.getJWT();
+                delete getUser.token;
+                return res.status(200).json({
                   success: true,
+                  token: getToken,
                   message:
                     "User successfully created and his quests and challenges. One challenges send by get randomly",
                   data: {
