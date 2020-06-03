@@ -171,7 +171,11 @@ router.post("/auth", UserController.userLogin);
  *                  type: string
  *                  example: "Too many requests by IP, please try again after an 1 minute"
  */
-router.get("/user/me", passport.authenticate("jwt"), UserController.me);
+router.get(
+  "/user/me",
+  // passport.authenticate("jwt"),
+  UserController.me
+);
 // User Quests CRUD
 // /**
 //  * @swagger
@@ -207,7 +211,7 @@ router.get("/user/me", passport.authenticate("jwt"), UserController.me);
 //  */
 router.get(
   "/quests",
-  passport.authenticate("jwt"),
+  // passport.authenticate("jwt"),
   UserQuestsController.getAll
 );
 
@@ -279,7 +283,11 @@ router.get(
  *                  type: string
  *                  example: "error message written here"
  */
-router.post("/quests", passport.authenticate("jwt"), UserQuestsController.new);
+router.post(
+  "/quests",
+  // passport.authenticate("jwt"),
+  UserQuestsController.new
+);
 
 /**
  * @swagger
@@ -389,7 +397,7 @@ router.patch(
  */
 router.delete(
   "/quests/:questId",
-  passport.authenticate("jwt"),
+  // passport.authenticate("jwt"),
   UserQuestsController.delete
 );
 
@@ -472,7 +480,7 @@ router.delete(
  */
 router.patch(
   "/challenges/:challengeId",
-  passport.authenticate("jwt"),
+  // passport.authenticate("jwt"),
   UserChallengesController.update
 );
 
