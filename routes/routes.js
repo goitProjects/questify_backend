@@ -222,16 +222,6 @@ router.get(
  *   post:
  *     tags:
  *       - Quests CRUD
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: Authorization
- *         in: header
- *         description: token to be passed as a header
- *         required: true
- *         schema:
- *            type: string
- *            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZDY2NjUzMzc4MWMxZDIzNDhkOWMxNiIsImlhdCI6MTU5MTEwOTU5MywiZXhwIjoxNTkxMTE5NTkzfQ.uOJPW-Fft4QriDw6fgUxc26pYAmUWAFI6G9Kqwm1Gwk
  *     requestBody:
  *       content:
  *         application/json:
@@ -242,7 +232,12 @@ router.get(
  *                group
  *                difficulty
  *                dueDate
+ *                userId
  *             properties:
+ *                userId:
+ *                  type: string
+ *                  format: uuid
+ *                  example: 5ed7711ed690d225573d9d7b
  *                name:
  *                  type: string
  *                  example: Title Quest 1
@@ -296,8 +291,6 @@ router.post(
  *   patch:
  *     tags:
  *       - Quests CRUD
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - name: questId
  *         in: path
@@ -307,13 +300,6 @@ router.post(
  *            type: string
  *            format: uuid
  *            example: 5ed689d8ad016e425f79faaa
- *       - name: Authorization
- *         in: header
- *         description: token to be passed as a header
- *         required: true
- *         schema:
- *            type: string
- *            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZDY2NjUzMzc4MWMxZDIzNDhkOWMxNiIsImlhdCI6MTU5MTEwOTU5MywiZXhwIjoxNTkxMTE5NTkzfQ.uOJPW-Fft4QriDw6fgUxc26pYAmUWAFI6G9Kqwm1Gwk
  *     responses:
  *       200:
  *         description: Return json with User data create
@@ -352,8 +338,6 @@ router.patch(
  *   delete:
  *     tags:
  *       - Quests CRUD
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - name: questId
  *         in: path
@@ -363,13 +347,6 @@ router.patch(
  *            type: string
  *            format: uuid
  *            example: 5ed689d8ad016e425f79faaa
- *       - name: Authorization
- *         in: header
- *         description: token to be passed as a header
- *         required: true
- *         schema:
- *            type: string
- *            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZDY2NjUzMzc4MWMxZDIzNDhkOWMxNiIsImlhdCI6MTU5MTEwOTU5MywiZXhwIjoxNTkxMTE5NTkzfQ.uOJPW-Fft4QriDw6fgUxc26pYAmUWAFI6G9Kqwm1Gwk
  *     responses:
  *       200:
  *         description: Return json with User data create
@@ -405,20 +382,21 @@ router.delete(
 /**
  * @swagger
  *
- * /api/challenges/{challengeId}:
+ * /api/challenges/:challengeId:
  *   patch:
  *     tags:
  *       - Challenges CRUD
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: Authorization
- *         in: header
- *         description: token to be passed as a header
+ *       - name: challengeId
+ *         in: path
+ *         description: Pass in path challengeId
  *         required: true
  *         schema:
  *            type: string
- *            example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZDY2NjUzMzc4MWMxZDIzNDhkOWMxNiIsImlhdCI6MTU5MTEwOTU5MywiZXhwIjoxNTkxMTE5NTkzfQ.uOJPW-Fft4QriDw6fgUxc26pYAmUWAFI6G9Kqwm1Gwk
+ *            format: uuid
+ *            example: 5ed689d8ad016e425f79faaa
  *     requestBody:
  *       content:
  *         application/json:
