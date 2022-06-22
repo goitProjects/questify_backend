@@ -15,7 +15,7 @@
     "node": ">=10.0.0"
   },
   "dependencies": {
-    "async": "3.2.0",
+    "async": "3.2.2",
     "bcrypt": "4.0.1",
     "connect-flash": "0.1.1",
     "cors": "2.8.5",
